@@ -10,6 +10,8 @@ export function Login() {
     setError(null);
     try {
       await signInWithGoogle();
+      // On mobile this redirects so we never reach here.
+      // On desktop popup, we reach here on success and onAuthStateChanged takes over.
     } catch (err) {
       const code = (err as { code?: string }).code;
       if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
@@ -17,7 +19,6 @@ export function Login() {
       } else {
         setError((err as Error).message);
       }
-    } finally {
       setBusy(false);
     }
   }

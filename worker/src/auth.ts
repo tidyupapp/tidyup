@@ -29,71 +29,17 @@ let jwksCache: { keys: JWK[]; expiresAt: number } | null = null;
 
 async function fetchJwks(): Promise<JWK[]> {
   if (jwksCache && jwksCache.expiresAt > Date.now()) return jwksCache.keys;
+  // Use the JWK-formatted endpoint instead of the X509 cert endpoint.
+  // This returns ready-to-import RSA keys, no ASN.1 parsing required.
   const res = await fetch(
-    'https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com'
+    'https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com'
   );
-  if (!res.ok) throw new Error('Failed to fetch Google certs');
-  const certs = (await res.json()) as Record<string, string>;
-  const keys = await Promise.all(
-    Object.entries(certs).map(async ([kid, pem]) => {
-      const der = pemToDer(pem);
-      const cert = parseX509Spki(der);
-      return { kid, n: b64urlEncode(cert.n), e: b64urlEncode(cert.e), alg: 'RS256', kty: 'RSA' } as JWK;
-    })
-  );
+  if (!res.ok) throw new Error('Failed to fetch Google JWKs');
+  const body = (await res.json()) as { keys: JWK[] };
   const cacheControl = res.headers.get('Cache-Control') ?? '';
   const maxAge = parseInt(cacheControl.match(/max-age=(\d+)/)?.[1] ?? '3600', 10);
-  jwksCache = { keys, expiresAt: Date.now() + maxAge * 1000 };
-  return keys;
-}
-
-function pemToDer(pem: string): Uint8Array {
-  const b64 = pem.replace(/-----BEGIN [^-]+-----/g, '').replace(/-----END [^-]+-----/g, '').replace(/\s+/g, '');
-  const bin = atob(b64);
-  const out = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
-  return out;
-}
-
-function parseX509Spki(der: Uint8Array): { n: Uint8Array; e: Uint8Array } {
-  // Walk DER to find the RSA public key (n, e). Cheap parser.
-  // Find the BIT STRING (tag 0x03) that contains the SubjectPublicKey
-  let i = 0;
-  function readLen(): number {
-    const first = der[i++];
-    if ((first & 0x80) === 0) return first;
-    const n = first & 0x7f;
-    let len = 0;
-    for (let k = 0; k < n; k++) len = (len << 8) | der[i++];
-    return len;
-  }
-  function expect(tag: number): number {
-    if (der[i] !== tag) throw new Error(`Expected tag ${tag.toString(16)} at offset ${i}, got ${der[i].toString(16)}`);
-    i++;
-    return readLen();
-  }
-  expect(0x30); // outer SEQUENCE
-  const algLen = expect(0x30); // AlgorithmIdentifier SEQUENCE
-  i += algLen;
-  const bitStringLen = expect(0x03);
-  if (der[i] !== 0) throw new Error('Expected leading 0 byte in BIT STRING');
-  i++;
-  void bitStringLen;
-  expect(0x30); // RSAPublicKey SEQUENCE
-  const nLen = expect(0x02); // INTEGER n
-  let n = der.slice(i, i + nLen);
-  if (n[0] === 0) n = n.slice(1);
-  i += nLen;
-  const eLen = expect(0x02); // INTEGER e
-  let e = der.slice(i, i + eLen);
-  if (e[0] === 0) e = e.slice(1);
-  return { n, e };
-}
-
-function b64urlEncode(bytes: Uint8Array): string {
-  let s = '';
-  for (let i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
-  return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+  jwksCache = { keys: body.keys, expiresAt: Date.now() + maxAge * 1000 };
+  return body.keys;
 }
 
 function b64urlDecode(s: string): Uint8Array {
