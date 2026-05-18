@@ -13,8 +13,8 @@ database_id = "b17c4662-cf14-449a-93d4-8a743415e1f2"
 
 [vars]
 FIREBASE_PROJECT_ID = "tidyup-b4b71"
-ALLOWED_ORIGINS = "http://localhost:5173,http://localhost:5174,http://localhost:5175,https://tidyup-3xc.pages.dev"
-APP_BASE_URL = "https://tidyup-3xc.pages.dev"
+ALLOWED_ORIGINS = "http://localhost:5173,http://localhost:5174,http://localhost:5175,https://tidyup-app.pages.dev,https://tidyup-3xc.pages.dev"
+APP_BASE_URL = "https://tidyup-app.pages.dev"
 # eBay redirect URI auth name (set via dashboard after eBay app registration)
 EBAY_RUNAME = ""
 EBAY_ENVIRONMENT = "sandbox"
