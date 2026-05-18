@@ -134,7 +134,7 @@ Format: integrated content, no banner ads. "Tidyup × Rollo" guide about printin
 |---|---|---|
 | Now | Scaffolding (Recommendations component, dismiss state, opt-out toggle) | Tonight |
 | Week 1 | Pirate Ship affiliate live (real link, real tracking) | After eBay setup is verified |
-| Week 2 | Amazon Associates approval + supplies recommendation | Needs Kent's Associates application |
+| Week 2 | Amazon Associates approval + supplies recommendation | Needs operator's Associates application |
 | Week 3 | Decluttr / BackMarket partner sign-ups | Apply during business hours |
 | Month 2 | Pro tier — Stripe integration, paywall logic | After we have 50+ active free users |
 | Month 3 | Insights data aggregation backend | Backend infrastructure work |

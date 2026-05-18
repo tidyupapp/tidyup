@@ -48,7 +48,7 @@ npm --version
 
 ### 2. Install project dependencies
 
-From the project folder (`C:\Users\Kent\projects\tidyup`):
+From the project folder:
 ```powershell
 npm install
 ```
