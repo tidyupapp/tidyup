@@ -5,6 +5,7 @@ import { Login } from './components/Login';
 import { UserMenu } from './components/UserMenu';
 import { ListingsSheet } from './components/ListingsSheet';
 import { ConnectionsSheet } from './components/ConnectionsSheet';
+import { ProSheet } from './components/ProSheet';
 import { type AppUser, watchAuth } from './lib/firebase';
 import { loadListings } from './lib/storage';
 import { isStandalone } from './lib/platform';
@@ -15,6 +16,7 @@ export default function App() {
   const [auth, setAuth] = useState<AuthState>({ kind: 'loading' });
   const [listingsOpen, setListingsOpen] = useState(false);
   const [connectionsOpen, setConnectionsOpen] = useState(false);
+  const [proOpen, setProOpen] = useState(false);
   const [listingCount, setListingCount] = useState(0);
 
   useEffect(() => {
@@ -79,6 +81,7 @@ export default function App() {
           listingCount={listingCount}
           onOpenListings={() => setListingsOpen(true)}
           onOpenConnections={() => setConnectionsOpen(true)}
+          onOpenPro={() => setProOpen(true)}
         />
       </header>
       <main className="main">
@@ -86,6 +89,7 @@ export default function App() {
       </main>
       <ListingsSheet open={listingsOpen} onClose={() => setListingsOpen(false)} />
       <ConnectionsSheet open={connectionsOpen} onClose={() => setConnectionsOpen(false)} />
+      <ProSheet open={proOpen} onClose={() => setProOpen(false)} />
       <InstallPrompt />
     </div>
   );

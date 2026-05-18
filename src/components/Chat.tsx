@@ -3,8 +3,10 @@ import type { ChatMessage, Listing, Platform, Provider } from '../lib/types';
 import { analyzeItem, chat, type ChatTurn } from '../ai';
 import { upsertListing } from '../lib/storage';
 import { handoffToPlatform, openPlatformUrl, platformLabel } from '../lib/handoff';
+import { pickRecommendation } from '../lib/recommendations';
 import { PhotoCapture } from './PhotoCapture';
 import { ListingCard } from './ListingCard';
+import { RecommendationCard } from './RecommendationCard';
 import { markFirstSuccess } from './InstallPrompt';
 
 interface Props {
@@ -167,6 +169,14 @@ export function Chat({ provider }: Props) {
         );
       }
       if (navigator.vibrate) navigator.vibrate(30);
+
+      // Show one contextual recommendation, if any apply.
+      const rec = pickRecommendation(updated, platform);
+      if (rec) {
+        setMessages((m) =>
+          m.concat({ id: id(), kind: 'recommendation', from: 'assistant', listingId: updated.id, rec })
+        );
+      }
     } catch (err) {
       const msg = (err as Error).message;
       const isEbayNotConnected = msg.includes('eBay not connected');
@@ -263,6 +273,13 @@ function MessageView({
           onChange={onListingChange}
           onPostTo={(p) => onPostTo(msg.listing, p)}
         />
+      </div>
+    );
+  }
+  if (msg.kind === 'recommendation') {
+    return (
+      <div className="bubble assistant card-wrap">
+        <RecommendationCard listingId={msg.listingId} rec={msg.rec} />
       </div>
     );
   }

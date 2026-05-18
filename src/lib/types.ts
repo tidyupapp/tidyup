@@ -36,4 +36,5 @@ export type ChatMessage =
   | { id: string; kind: 'text'; from: 'assistant' | 'user'; text: string }
   | { id: string; kind: 'photo'; from: 'user'; imageDataUrl: string }
   | { id: string; kind: 'thinking'; from: 'assistant' }
-  | { id: string; kind: 'listing'; from: 'assistant'; listing: Listing };
+  | { id: string; kind: 'listing'; from: 'assistant'; listing: Listing }
+  | { id: string; kind: 'recommendation'; from: 'assistant'; listingId: string; rec: import('./recommendations').Recommendation };

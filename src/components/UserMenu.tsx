@@ -1,16 +1,19 @@
 import { useEffect, useRef, useState } from 'react';
 import type { AppUser } from '../lib/firebase';
 import { signOut } from '../lib/firebase';
+import { getPrefs, setPrefs } from '../lib/recommendations';
 
 interface Props {
   user: AppUser;
   listingCount: number;
   onOpenListings: () => void;
   onOpenConnections: () => void;
+  onOpenPro: () => void;
 }
 
-export function UserMenu({ user, listingCount, onOpenListings, onOpenConnections }: Props) {
+export function UserMenu({ user, listingCount, onOpenListings, onOpenConnections, onOpenPro }: Props) {
   const [open, setOpen] = useState(false);
+  const [recsEnabled, setRecsEnabled] = useState(() => getPrefs().enabled);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -20,6 +23,12 @@ export function UserMenu({ user, listingCount, onOpenListings, onOpenConnections
     if (open) document.addEventListener('pointerdown', onDoc);
     return () => document.removeEventListener('pointerdown', onDoc);
   }, [open]);
+
+  function toggleRecs() {
+    const next = !recsEnabled;
+    setRecsEnabled(next);
+    setPrefs({ enabled: next });
+  }
 
   const initial = (user.name ?? user.email ?? 'U').trim().charAt(0).toUpperCase();
 
@@ -73,6 +82,31 @@ export function UserMenu({ user, listingCount, onOpenListings, onOpenConnections
             <span>Connections</span>
             <span className="count">⚡</span>
           </button>
+
+          <button
+            className="popover-item pro"
+            onClick={() => {
+              setOpen(false);
+              onOpenPro();
+            }}
+          >
+            <span>Tidyup Pro</span>
+            <span className="count badge">$7.99/mo</span>
+          </button>
+
+          <div className="popover-toggle">
+            <label>
+              <span>Show helpful tips</span>
+              <input
+                type="checkbox"
+                checked={recsEnabled}
+                onChange={toggleRecs}
+              />
+            </label>
+            <div className="popover-toggle-hint">
+              Affiliate suggestions like cheap shipping labels — never banner ads. Off for Pro users.
+            </div>
+          </div>
 
           <button
             className="popover-item danger"
