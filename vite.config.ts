@@ -66,6 +66,12 @@ export default defineConfig({
       }
     })
   ],
+  build: {
+    // Do NOT ship source maps to production.
+    // Source maps would let anyone download the full original TypeScript source,
+    // including comments, file paths, and any developer-only context.
+    sourcemap: false
+  },
   server: {
     port: 5173
   }
