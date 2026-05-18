@@ -9,7 +9,8 @@ class ApiError extends Error {
 }
 
 async function authedFetch(path: string, init: RequestInit = {}): Promise<Response> {
-  if (!API_BASE) throw new Error('VITE_API_BASE not set');
+  // API_BASE empty = same-origin /api/* calls (Pages Functions).
+  // Non-empty = cross-origin call to a standalone Worker (legacy).
   const user = getAuth().currentUser;
   if (!user) throw new ApiError(401, 'Not signed in');
   const token = await user.getIdToken();

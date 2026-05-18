@@ -1,0 +1,27 @@
+name = "tidyup-app"
+compatibility_date = "2026-05-01"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = "./dist"
+
+# Bindings exposed to Pages Functions (functions/api/*).
+# This lets the same code that used to run in the standalone Worker
+# run as part of the Pages deployment at /api/* on tidyup-app.pages.dev
+# — keeps the workers.dev subdomain out of the public JS bundle.
+
+[[d1_databases]]
+binding = "DB"
+database_name = "tidyup"
+database_id = "b17c4662-cf14-449a-93d4-8a743415e1f2"
+
+[vars]
+FIREBASE_PROJECT_ID = "tidyup-b4b71"
+ALLOWED_ORIGINS = "http://localhost:5173,http://localhost:5174,http://localhost:5175,https://tidyup-app.pages.dev,https://tidyup-3xc.pages.dev"
+APP_BASE_URL = "https://tidyup-app.pages.dev"
+EBAY_RUNAME = ""
+EBAY_ENVIRONMENT = "sandbox"
+
+# Secrets are set separately via:
+#   npx wrangler pages secret put GEMINI_API_KEY --project-name=tidyup-app
+#   npx wrangler pages secret put ANTHROPIC_API_KEY --project-name=tidyup-app
+#   npx wrangler pages secret put EBAY_CLIENT_ID --project-name=tidyup-app
+#   npx wrangler pages secret put EBAY_CLIENT_SECRET --project-name=tidyup-app
