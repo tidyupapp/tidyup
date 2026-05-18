@@ -28,7 +28,7 @@ export function upsertListing(listing: Listing): Listing[] {
 export function getProvider(): Provider {
   const stored = localStorage.getItem(PROVIDER_KEY) as Provider | null;
   if (stored === 'claude' || stored === 'gemini') return stored;
-  const fromEnv = (import.meta.env.VITE_AI_PROVIDER ?? 'claude') as Provider;
+  const fromEnv = (import.meta.env.VITE_AI_PROVIDER ?? 'gemini') as Provider;
   return fromEnv;
 }
 

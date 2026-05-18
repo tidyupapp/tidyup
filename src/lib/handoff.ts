@@ -1,49 +1,102 @@
 import type { Listing, Platform } from './types';
+import { postToEbay } from './api';
 
 export interface HandoffResult {
   platform: Platform;
-  url: string;
-  copiedText: string;
-  photoDownloaded: boolean;
+  mode: 'auto' | 'handoff';
+  url?: string;
+  externalUrl?: string;
+  copiedText?: string;
+  photoDownloaded?: boolean;
   instructions: string[];
 }
 
 export async function handoffToPlatform(listing: Listing, platform: Platform): Promise<HandoffResult> {
+  if (platform === 'ebay') {
+    return postEbayAuto(listing);
+  }
+  return postHandoff(listing, platform as Exclude<Platform, 'ebay'>);
+}
+
+async function postEbayAuto(listing: Listing): Promise<HandoffResult> {
+  const result = await postToEbay({
+    title: listing.title,
+    description: listing.description,
+    priceUsd: listing.priceMax > 0 ? listing.priceMax : listing.priceMin,
+    condition: listing.condition
+  });
+  return {
+    platform: 'ebay',
+    mode: 'auto',
+    externalUrl: result.viewUrl,
+    instructions: result.viewUrl
+      ? [`Listed live on eBay.`, `View: ${result.viewUrl}`]
+      : [`Listing draft created (offer ${result.offerId}). Visit eBay to complete details.`]
+  };
+}
+
+async function postHandoff(listing: Listing, platform: Exclude<Platform, 'ebay'>): Promise<HandoffResult> {
   const clipboardBlock = formatClipboardBlock(listing, platform);
   await copyToClipboard(clipboardBlock);
-
   const photoDownloaded = await saveListingPhoto(listing);
-
-  if (platform === 'facebook') {
-    return {
-      platform,
-      url: 'https://www.facebook.com/marketplace/create/item',
-      copiedText: clipboardBlock,
-      photoDownloaded,
-      instructions: [
-        'Facebook Marketplace will open in a new tab.',
-        'Tap "Add Photos" and pick the photo you just downloaded.',
-        'Paste (Cmd/Ctrl+V or long-press → Paste) into Title — Facebook grabs line one.',
-        'Paste again into Description — it grabs the rest.',
-        'Set the price and category, then hit Publish.'
-      ]
-    };
-  }
+  const handoff = HANDOFF_SPECS[platform];
 
   return {
     platform,
-    url: 'https://post.craigslist.org/',
+    mode: 'handoff',
+    url: handoff.url,
     copiedText: clipboardBlock,
     photoDownloaded,
+    instructions: handoff.instructions
+  };
+}
+
+interface HandoffSpec {
+  url: string;
+  instructions: string[];
+}
+
+const HANDOFF_SPECS: Record<Exclude<Platform, 'ebay'>, HandoffSpec> = {
+  facebook: {
+    url: 'https://www.facebook.com/marketplace/create/item',
+    instructions: [
+      'Facebook Marketplace will open in a new tab.',
+      'Tap "Add Photos" and pick the photo we just downloaded.',
+      'Paste (Ctrl/Cmd+V) into Title — it grabs line one.',
+      'Paste again into Description — it grabs the rest.',
+      'Set price + category, then hit Publish.'
+    ]
+  },
+  offerup: {
+    url: 'https://offerup.com/sell',
+    instructions: [
+      'OfferUp will open in a new tab.',
+      'Tap the camera icon and pick the photo we just downloaded.',
+      'Paste the copied text into the description area.',
+      'Set the price and category, then hit Post.'
+    ]
+  },
+  nextdoor: {
+    url: 'https://nextdoor.com/news_feed/?post=for_sale',
+    instructions: [
+      'Nextdoor will open in a new tab.',
+      'Pick "For sale & free" if not already selected.',
+      'Paste the copied text into the post body.',
+      'Upload the photo we just downloaded.',
+      'Set price + neighborhoods + post.'
+    ]
+  },
+  craigslist: {
+    url: 'https://post.craigslist.org/',
     instructions: [
       'Craigslist posting will open in a new tab.',
       'Pick your city, then "for sale by owner" and the right category.',
       'Paste the copied text — title is line one, body is the rest.',
-      'Upload the photo you just downloaded.',
-      'Finish posting in Craigslist (they require email verification).'
+      'Upload the photo we just downloaded.',
+      'Finish in Craigslist (they require email verification).'
     ]
-  };
-}
+  }
+};
 
 export function openPlatformUrl(url: string): void {
   window.open(url, '_blank', 'noopener,noreferrer');
@@ -72,7 +125,7 @@ async function copyToClipboard(text: string): Promise<void> {
       return;
     }
   } catch {
-    /* fall through to legacy */
+    /* fall through */
   }
   const ta = document.createElement('textarea');
   ta.value = text;
@@ -114,5 +167,20 @@ function slugify(s: string): string {
 }
 
 export function platformLabel(p: Platform): string {
-  return p === 'facebook' ? 'Facebook Marketplace' : 'Craigslist';
+  switch (p) {
+    case 'ebay':
+      return 'eBay';
+    case 'facebook':
+      return 'Facebook Marketplace';
+    case 'offerup':
+      return 'OfferUp';
+    case 'nextdoor':
+      return 'Nextdoor';
+    case 'craigslist':
+      return 'Craigslist';
+  }
+}
+
+export function platformMode(p: Platform): 'auto' | 'handoff' {
+  return p === 'ebay' ? 'auto' : 'handoff';
 }

@@ -1,0 +1,16 @@
+{
+  "name": "tidyup-api",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "migrate:local": "wrangler d1 migrations apply tidyup --local",
+    "migrate:remote": "wrangler d1 migrations apply tidyup --remote"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20251101.0",
+    "typescript": "^5.6.3",
+    "wrangler": "^4.92.0"
+  }
+}

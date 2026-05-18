@@ -141,27 +141,40 @@ export function Chat({ provider }: Props) {
       };
       upsertListing(updated);
       updateListing(updated);
-      openPlatformUrl(result.url);
+      window.dispatchEvent(new Event('tidyup:listings-changed'));
 
-      const lines = [
-        `Opening ${platformLabel(platform)} in a new tab.`,
-        '✅ Listing text is copied to your clipboard.',
-        result.photoDownloaded ? '✅ Photo downloaded to your device.' : '⚠️ Photo download blocked — long-press the photo above and "Save Image" to use it.',
-        '',
-        ...result.instructions
-      ];
-      setMessages((m) =>
-        m.concat({ id: id(), kind: 'text', from: 'assistant', text: lines.join('\n') })
-      );
+      if (result.mode === 'auto') {
+        const lines = [
+          `✅ Posted to ${platformLabel(platform)} automatically.`,
+          ...(result.externalUrl ? [`View: ${result.externalUrl}`] : []),
+          '',
+          ...result.instructions
+        ];
+        setMessages((m) =>
+          m.concat({ id: id(), kind: 'text', from: 'assistant', text: lines.join('\n') })
+        );
+      } else {
+        if (result.url) openPlatformUrl(result.url);
+        const lines = [
+          `Opening ${platformLabel(platform)} in a new tab.`,
+          '✅ Listing text is copied to your clipboard.',
+          result.photoDownloaded ? '✅ Photo downloaded to your device.' : '⚠️ Photo download blocked — long-press the photo above and "Save Image" to use it.',
+          '',
+          ...result.instructions
+        ];
+        setMessages((m) =>
+          m.concat({ id: id(), kind: 'text', from: 'assistant', text: lines.join('\n') })
+        );
+      }
       if (navigator.vibrate) navigator.vibrate(30);
     } catch (err) {
+      const msg = (err as Error).message;
+      const isEbayNotConnected = msg.includes('eBay not connected');
+      const text = isEbayNotConnected
+        ? `eBay isn't connected yet. Tap your avatar → Connections → Connect eBay.`
+        : `Couldn't post to ${platformLabel(platform)}: ${msg}`;
       setMessages((m) =>
-        m.concat({
-          id: id(),
-          kind: 'text',
-          from: 'assistant',
-          text: `Couldn't hand off: ${(err as Error).message}`
-        })
+        m.concat({ id: id(), kind: 'text', from: 'assistant', text })
       );
     } finally {
       setBusy(false);

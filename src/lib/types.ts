@@ -1,4 +1,4 @@
-export type Platform = 'facebook' | 'craigslist';
+export type Platform = 'ebay' | 'facebook' | 'offerup' | 'nextdoor' | 'craigslist';
 
 export type Condition = 'new' | 'like-new' | 'good' | 'fair' | 'for-parts';
 

@@ -9,7 +9,10 @@ interface Props {
 }
 
 const PLATFORMS: { id: Platform; label: string; hint: string }[] = [
+  { id: 'ebay', label: 'eBay', hint: 'auto · connect required' },
   { id: 'facebook', label: 'Facebook', hint: 'Marketplace' },
+  { id: 'offerup', label: 'OfferUp', hint: 'Local' },
+  { id: 'nextdoor', label: 'Nextdoor', hint: 'For sale' },
   { id: 'craigslist', label: 'Craigslist', hint: 'For sale' }
 ];
 
