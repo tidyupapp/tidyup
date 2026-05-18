@@ -1,0 +1,12 @@
+/// <reference types="vite/client" />
+/// <reference types="vite-plugin-pwa/client" />
+
+interface ImportMetaEnv {
+  readonly VITE_AI_PROVIDER?: 'claude' | 'gemini';
+  readonly VITE_ANTHROPIC_API_KEY?: string;
+  readonly VITE_GEMINI_API_KEY?: string;
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
+}
