@@ -51,6 +51,12 @@ export function Login() {
         <p className="login-fineprint">
           Free to use. No credit card. We never post anything without your approval.
         </p>
+
+        <p className="login-legal">
+          By continuing you accept our <a href="/terms.html" target="_blank" rel="noopener">Terms</a> and <a href="/privacy.html" target="_blank" rel="noopener">Privacy Policy</a>.
+          <br />
+          Tidyup is not affiliated with eBay, Facebook, OfferUp, Nextdoor, or Craigslist.
+        </p>
       </div>
     </div>
   );

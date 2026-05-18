@@ -7,6 +7,7 @@ import { ListingsSheet } from './components/ListingsSheet';
 import { ConnectionsSheet } from './components/ConnectionsSheet';
 import { type AppUser, watchAuth } from './lib/firebase';
 import { loadListings } from './lib/storage';
+import { isStandalone } from './lib/platform';
 
 type AuthState = { kind: 'loading' } | { kind: 'out' } | { kind: 'in'; user: AppUser };
 
@@ -21,7 +22,18 @@ export default function App() {
     if (params.get('connected')) {
       setConnectionsOpen(true);
       params.delete('connected');
-      const newSearch = params.toString();
+    }
+    const view = params.get('view');
+    if (view === 'listings') {
+      setListingsOpen(true);
+      params.delete('view');
+    } else if (view === 'connections') {
+      setConnectionsOpen(true);
+      params.delete('view');
+    }
+    if (isStandalone()) document.body.classList.add('is-standalone');
+    const newSearch = params.toString();
+    if (newSearch !== window.location.search.slice(1)) {
       window.history.replaceState({}, '', window.location.pathname + (newSearch ? `?${newSearch}` : ''));
     }
   }, []);
