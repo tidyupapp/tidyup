@@ -23,31 +23,34 @@ The frontend and Worker are wired up for real eBay OAuth + auto-posting. The onl
 1. On the same keys page, find **User Tokens** → **Get a Token from eBay via Your Application**.
 2. Click **Add eBay Redirect URL** under Sandbox.
 3. Fill in:
-   - **Your auth accepted URL**: `https://tidyup-api.satraps-debate-0r.workers.dev/api/connections/ebay/callback`
+   - **Your auth accepted URL**: `https://tidyup-app.pages.dev/api/connections/ebay/callback`
    - **Your auth declined URL**: `https://tidyup-app.pages.dev/?ebay=cancelled`
    - **Your privacy policy URL**: `https://tidyup-app.pages.dev/privacy.html`
 4. Save. eBay assigns a **RuName** that looks like `Username_Tidyup-Username-Tidyu-abcde-fghijk`. Copy it.
 
 ## 4. Tell Tidyup about the credentials
 
-From the worker directory:
+From the project root:
 
 ```powershell
-cd projects\tidyup\worker
-echo "PASTE_APP_ID_HERE" | npx wrangler secret put EBAY_CLIENT_ID
-echo "PASTE_CERT_ID_HERE" | npx wrangler secret put EBAY_CLIENT_SECRET
+cd projects\tidyup
+npx wrangler pages secret put EBAY_CLIENT_ID --project-name=tidyup-app
+# paste App ID when prompted
+npx wrangler pages secret put EBAY_CLIENT_SECRET --project-name=tidyup-app
+# paste Cert ID when prompted
 ```
 
-Then open `worker/wrangler.toml` and replace the empty `EBAY_RUNAME = ""` with the RuName:
+Then open `wrangler.toml` at the project root and replace the empty `EBAY_RUNAME = ""` with the RuName:
 
 ```toml
 EBAY_RUNAME = "Username_Tidyup-Username-Tidyu-abcde-fghijk"
 ```
 
-Then redeploy the Worker:
+Then redeploy:
 
 ```powershell
-npx wrangler deploy
+npm run build
+npx wrangler pages deploy dist --project-name=tidyup-app
 ```
 
 ## 5. Test it
